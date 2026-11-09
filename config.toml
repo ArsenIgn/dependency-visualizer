@@ -1,4 +1,4 @@
 package_name = "A"
-repository = "tests/fixtures/branch.Json"
+repository = "tests/fixtures/cycle.json"
 test_mode = true
 ascii_tree = true

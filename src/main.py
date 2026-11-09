@@ -7,6 +7,7 @@ from pathlib import Path
 from config import load_config
 from graph import build_graph, print_graph
 from repository import prepare_repository
+from reverse import print_reverse_dependencies
 
 
 def get_arguments():
@@ -22,14 +23,31 @@ def get_arguments():
         default=str(default_config),
         help="Путь к конфигурационному файлу TOML.",
     )
-
+    parser.add_argument(
+        "--reverse",
+        action="store_true",
+        help="Вывести обратные зависимости тестового пакета.",
+    )
     return parser.parse_args()
 
 
 def run_application(arguments):
-    """Загрузить репозиторий, построить и вывести граф."""
+    """Построить граф или найти обратные зависимости."""
     config = load_config(arguments.config)
-    root, loader, _ = prepare_repository(config, arguments.config)
+    root, loader, repository = prepare_repository(
+        config,
+        arguments.config,
+    )
+
+    if arguments.reverse:
+        if repository is None:
+            raise ValueError(
+                "Обратный поиск доступен для тестового репозитория."
+            )
+
+        print_reverse_dependencies(repository, root)
+        return
+
     graph, cycles = build_graph(root, loader)
     print_graph(graph, cycles)
 

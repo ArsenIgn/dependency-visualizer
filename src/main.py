@@ -5,14 +5,15 @@ import sys
 from pathlib import Path
 
 from config import load_config
-from nuget import get_direct_dependencies, print_dependencies
+from graph import build_graph, print_graph
+from repository import prepare_repository
+
 
 def get_arguments():
     """Прочитать аргументы командной строки."""
     default_config = (
         Path(__file__).resolve().parent.parent / "config.toml"
     )
-
     parser = argparse.ArgumentParser(
         description="Инструмент визуализации зависимостей NuGet."
     )
@@ -24,32 +25,27 @@ def get_arguments():
 
     return parser.parse_args()
 
+
+def run_application(arguments):
+    """Загрузить репозиторий, построить и вывести граф."""
+    config = load_config(arguments.config)
+    root, loader, _ = prepare_repository(config, arguments.config)
+    graph, cycles = build_graph(root, loader)
+    print_graph(graph, cycles)
+
+
 def main():
-    """Загрузить настройки и вывести прямые зависимости."""
+    """Запустить приложение с обработкой ошибок."""
     arguments = get_arguments()
 
     try:
-        config = load_config(arguments.config)
-
-        if config["test_mode"]:
-            raise ValueError(
-                "Тестовый репозиторий будет поддержан на этапе 3."
-            )
-
-        version, dependencies = get_direct_dependencies(
-            config["repository"],
-            config["package_name"],
-        )
-        print_dependencies(
-            config["package_name"],
-            version,
-            dependencies,
-        )
-    except ValueError as error:
+        run_application(arguments)
+    except (ValueError, OSError) as error:
         print(f"Ошибка: {error}", file=sys.stderr)
         return 1
 
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())

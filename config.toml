@@ -1,4 +1,4 @@
-package_name = "Newtonsoft.Json"
-repository = "https://api.nuget.org/v3/index.json"
-test_mode = false
+package_name = "A"
+repository = "tests/fixtures/branch.Json"
+test_mode = true
 ascii_tree = true

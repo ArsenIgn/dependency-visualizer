@@ -8,19 +8,18 @@ from config import load_config
 from graph import build_graph, print_graph
 from repository import prepare_repository
 from reverse import print_reverse_dependencies
+from visualization import print_ascii_tree, visualize_graph
 
 
 def get_arguments():
     """Прочитать аргументы командной строки."""
-    default_config = (
-        Path(__file__).resolve().parent.parent / "config.toml"
-    )
+    project_directory = Path(__file__).resolve().parent.parent
     parser = argparse.ArgumentParser(
         description="Инструмент визуализации зависимостей NuGet."
     )
     parser.add_argument(
         "--config",
-        default=str(default_config),
+        default=str(project_directory / "config.toml"),
         help="Путь к конфигурационному файлу TOML.",
     )
     parser.add_argument(
@@ -28,6 +27,17 @@ def get_arguments():
         action="store_true",
         help="Вывести обратные зависимости тестового пакета.",
     )
+    parser.add_argument(
+        "--visualize",
+        action="store_true",
+        help="Создать и открыть изображение графа.",
+    )
+    parser.add_argument(
+        "--plantuml-jar",
+        default=str(project_directory / "tools" / "plantuml.jar"),
+        help="Путь к файлу PlantUML JAR.",
+    )
+
     return parser.parse_args()
 
 
@@ -50,6 +60,12 @@ def run_application(arguments):
 
     graph, cycles = build_graph(root, loader)
     print_graph(graph, cycles)
+    if config["ascii_tree"]:
+        print("ASCII-дерево зависимостей:")
+        print_ascii_tree(graph, root)
+
+    if arguments.visualize:
+        visualize_graph(graph, arguments.plantuml_jar)
 
 
 def main():

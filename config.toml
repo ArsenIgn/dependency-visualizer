@@ -1,4 +1,4 @@
-package_name = "A"
-repository = "tests/fixtures/cycle.json"
-test_mode = true
+package_name = "Newtonsoft.Json"
+repository = "https://api.nuget.org/v3/index.json"
+test_mode = false
 ascii_tree = true
